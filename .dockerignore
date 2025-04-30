@@ -1,0 +1,28 @@
+# Ambiente virtual
+venv_react/
+venv/
+env/
+
+# Arquivos de cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Arquivos do ambiente de desenvolvimento
+.env
+.env.local
+.vscode/
+.idea/
+
+# Dados que não precisam ser incluídos na imagem
+# Descomentar se quiser compartilhar apenas a estrutura (sem os dados)
+# chroma_db/
+
+# Arquivos de log
+*.log
+
+# Arquivos temporários
+.DS_Store
+Thumbs.db

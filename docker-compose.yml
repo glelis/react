@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Serviço da API Flask
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: python src/api/app.py
+    volumes:
+      # Montar volumes para persistir os dados
+      - ./chroma_db:/app/chroma_db
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - FLASK_PORT=5000
+      - FLASK_DEBUG=False
+      - IN_DOCKER=1
+    ports:
+      - "5000:5000"
+  
+  # Serviço da interface Streamlit
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: streamlit run src/web/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://api:5000
+      - IN_DOCKER=1
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
