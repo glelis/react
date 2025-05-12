@@ -1,4 +1,4 @@
-# ReAct Chatbot with LangGraph and Vector Search
+# ReAct RAG Chatbot
 
 A conversational ReAct (Reasoning and Action) chatbot powered by LangGraph with semantic search capabilities over a vector knowledge base. It includes a Streamlit web interface and a Flask API, with support for multiple concurrent users.
 
@@ -50,7 +50,7 @@ This project implements a ReAct-based conversational agent using the LangGraph l
 
 ## Requirements
 
-- Python 3.12+
+- Python 3.12
 - OpenAI API key
 - Optional: Docker and Docker Compose for containerization
 
