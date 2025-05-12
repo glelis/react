@@ -77,7 +77,13 @@ class VectorStoreManager:
             metadatas: List of metadata associated with the documents
         """
         # Add to Chroma using pre-calculated embeddings
-        self.vector_store.add_embeddings(texts, embeddings, metadatas)
+        # Nota: alguns métodos antigos podem usar add_embeddings, outros add_texts
+        # Ambos executam a mesma função - adicionar textos com embeddings pré-calculados
+        self.vector_store.add_texts(
+            texts=texts,
+            metadatas=metadatas,
+            embeddings=embeddings
+        )
         
         # Persist the database
         self.vector_store.persist()
