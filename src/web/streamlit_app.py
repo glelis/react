@@ -21,7 +21,7 @@ from src.database.chat_memory import clear_agent_memory
 # Configure the Streamlit page
 st.set_page_config(
     page_title="LangGraph Chatbot",
-    page_icon="🤖",
+    page_icon=":fox_face:",
     layout="centered"
 )
 
@@ -37,7 +37,7 @@ if "thread_id" not in st.session_state:
     st.session_state.thread_id = str(uuid.uuid4())[:8]
 
 # Application title
-st.title("🤖 LangGraph Chatbot")
+st.title(":fox_face: ReAct RAG Chatbot")
 
 # Button to test API connection
 with st.sidebar:
@@ -64,20 +64,17 @@ if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     
     # Display user message
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar='🐸'):
         st.markdown(user_input)
     
     # Prepare message for the chatbot
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar='🦊'):
         message_placeholder = st.empty()
         message_placeholder.markdown("Thinking...")
         
         try:
             # Send message to the API
             api_url = f"{get_api_url()}/chat"
-            
-            # Debugging - display what is being sent to the API
-            st.sidebar.write("Sending to API:", {"message": user_input, "thread_id": st.session_state.thread_id})
             
             response = requests.post(
                 api_url,
@@ -87,14 +84,10 @@ if user_input:
             
             # Debugging - display raw API response
             st.sidebar.write("API status code:", response.status_code)
-            st.sidebar.write("API response (raw):", response.text)
             
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    
-                    # Debugging - display structured data
-                    st.sidebar.write("API data (parsed):", data)
                     
                     # Update thread_id if provided
                     if "thread_id" in data:
@@ -144,8 +137,6 @@ if user_input:
 
 # Sidebar with information
 with st.sidebar:
-    st.subheader("About the Chatbot")
-    st.write("This chatbot is built with LangGraph and uses an OpenAI language model to provide real-time responses.")
     
     st.subheader("Conversation State")
     st.write(f"Conversation ID: {st.session_state.thread_id}")
@@ -167,16 +158,9 @@ with st.sidebar:
     if st.button("Clear Session Cache"):
         # Save thread_id before clearing the cache to use it for clearing agent memory
         thread_id = st.session_state.thread_id if "thread_id" in st.session_state else None
-        
-        # Clear session cache
-        #for key in list(st.session_state.keys()):
-        #    del st.session_state[key]
-            
-        # Clear agent memory in the database
-        #if thread_id:
+
         records_removed = clear_agent_memory()
         st.success(f"Session cache and agent memory cleared! ({records_removed} records removed from the database)")
-        #else:
-        #    st.success("Session cache cleared!")
+
             
         st.rerun()

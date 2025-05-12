@@ -31,18 +31,12 @@ This project implements a ReAct-based conversational agent using the LangGraph l
 │   │   ├── document_processor.py # Processing of various document formats
 │   │   ├── json_serializer.py    # Document and embedding serialization
 │   │   ├── main.py               # Main processing script
-│   │   ├── query_tool.py         # Query tool for the vector store
-│   │   └── vector_store.py       # Vector DB manager
+│   │   └── query_tool.py         # Query tool for the vector store
 │   ├── database/                 # Database module
 │   │   ├── __init__.py
 │   │   └── vector_store.py       # Vector DB interface
 │   └── web/                      # Streamlit web app
 │       └── streamlit_app.py      # Web interface implementation
-├── chroma_db/                    # Directory for ChromaDB (vector search)
-├── data/                         # Persistent data (SQLite)
-├── chunks/                       # Processed document chunks
-├── embeddings/                   # Computed embeddings
-├── data_raw/                     # Raw documents to be processed
 ├── main.py                       # Console chatbot entry point
 ├── run_local.py                  # Local launcher script
 ├── requirements.txt              # Project dependencies
@@ -69,33 +63,27 @@ This project implements a ReAct-based conversational agent using the LangGraph l
    ```bash
    python -m venv venv_react
    source venv_react/bin/activate  # Linux/Mac
+   venv_react\Scripts\activate   # Windows
    ```
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Configure environment variables:
+4. Copy the `.env.example` file to `.env` and update the values as needed:
    ```bash
-   cp .env.example .env
-   # Edit the .env file with your settings
+   cp .env.example .env  # Linux/Mac
+   copy .env.example .env  # Windows
    ```
 
-### Docker
+### Docker Environment
 
-1. Clone the repository  
-2. Set up environment variables:
+1. Build and run the application using Docker Compose:
    ```bash
-   cp .env.example .env
-   # Edit the .env file with your settings
-   ```
-3. Build and launch containers:
-   ```bash
-   # For Docker Compose V2 (recommended)
-   docker compose up --build
-   
-   # For Docker Compose V1 (legacy)
    docker-compose up --build
    ```
+2. Access the application:
+   - Streamlit interface: [http://localhost:8501](http://localhost:8501)
+   - Flask API: [http://localhost:5000](http://localhost:5000)
 
 ## Configuration
 
@@ -127,24 +115,37 @@ You can launch the application in several modes using the `run_local.py` script:
 
 1. **Run all components** (Flask API + Streamlit interface):
    ```bash
-   ./run_local.py
+   python run_local.py
    ```
 
 2. **Run only the Flask API**:
    ```bash
-   ./run_local.py api
+   python run_local.py api
    ```
 
 3. **Run only the Streamlit web app** (requires the API to be running):
    ```bash
-   ./run_local.py web
+   python run_local.py web
    ```
 
 4. **Run the chatbot in console mode**:
    ```bash
-   ./run_local.py chatbot
+   python run_local.py chatbot
    # or
    python main.py
+   ```
+
+### Streamlit Interface
+
+1. Open the Streamlit interface in your browser: [http://localhost:8501](http://localhost:8501)
+2. Interact with the chatbot by typing your messages in the input box.
+
+### Flask API
+
+1. Send requests to the Flask API at [http://localhost:5000](http://localhost:5000).
+2. Example request using `curl`:
+   ```bash
+   curl -X POST http://localhost:5000/chat -H "Content-Type: application/json" -d '{"message": "Hello!"}'
    ```
 
 ### Document Processing & Embedding Generation
@@ -279,8 +280,12 @@ Persistent volumes are used for:
 
 ## Contributing
 
-Contributions are welcome! Feel free to open a Pull Request.
+Contributions are welcome! To contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Submit a pull request with a clear description of your changes.
 
 ## License
 
-This project is licensed under the MIT License – see the LICENSE file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
