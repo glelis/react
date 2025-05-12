@@ -1,28 +1,28 @@
-# Ambiente virtual
+# Virtual environment
 venv_react/
 venv/
 env/
 
-# Arquivos de cache Python
+# Python cache files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 
-# Arquivos do ambiente de desenvolvimento
+# Development environment files
 .env
 .env.local
 .vscode/
 .idea/
 
-# Dados que não precisam ser incluídos na imagem
-# Descomentar se quiser compartilhar apenas a estrutura (sem os dados)
+# Data that doesn't need to be included in the image
+# Uncomment if you want to share only the structure (without the data)
 # chroma_db/
 
-# Arquivos de log
+# Log files
 *.log
 
-# Arquivos temporários
+# Temporary files
 .DS_Store
 Thumbs.db

@@ -1,25 +1,25 @@
 #!/bin/bash
 
-# Criar diretórios necessários
+# Create necessary directories
 mkdir -p /app/data
 mkdir -p /app/chroma_db
 
-# Verificar o modo de execução
+# Check execution mode
 if [ "$1" = "flask" ] || [ "$1" = "api" ]; then
-    echo "Iniciando servidor API Flask..."
+    echo "Starting Flask API server..."
     python /app/src/api/app.py
 elif [ "$1" = "streamlit" ] || [ "$1" = "web" ]; then
-    echo "Iniciando interface web com Streamlit..."
+    echo "Starting Streamlit web interface..."
     streamlit run /app/src/web/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 elif [ "$1" = "chatbot" ]; then
-    echo "Iniciando chatbot em modo console..."
+    echo "Starting chatbot in console mode..."
     python /app/main.py
 elif [ -n "$1" ]; then
-    # Se um comando for fornecido, execute-o
+    # If a command is provided, execute it
     exec "$@"
 else
-    # Comportamento padrão: iniciar ambos os serviços em paralelo
-    echo "Iniciando todos os serviços..."
+    # Default behavior: start both services in parallel
+    echo "Starting all services..."
     python /app/src/api/app.py &
     streamlit run /app/src/web/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
 fi

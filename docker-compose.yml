@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  # Serviço da API Flask
+  # Flask API service
   api:
     build: 
       context: .
       dockerfile: Dockerfile
     command: python src/api/app.py
     volumes:
-      # Montar volumes para persistir os dados
+      # Mount volumes to persist data
       - ./chroma_db:/app/chroma_db
       - ./data:/app/data
     env_file:
@@ -20,7 +20,7 @@ services:
     ports:
       - "5000:5000"
   
-  # Serviço da interface Streamlit
+  # Streamlit interface service
   web:
     build: 
       context: .
