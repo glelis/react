@@ -1,9 +1,18 @@
 import argparse
 import json
-from vector_store import VectorStoreManager
-from json_serializer import JsonSerializer
 import os
+import sys
+from pathlib import Path
 import logging
+
+# Add the root directory to the Python PATH to allow relative imports
+current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
+root_dir = current_dir.parent.parent
+if str(root_dir) not in sys.path:
+    sys.path.insert(0, str(root_dir))
+
+from src.database import VectorStoreManager
+from json_serializer import JsonSerializer
 
 # Basic logging configuration
 logging.basicConfig(
