@@ -2,8 +2,7 @@ import sqlite3
 import os
 import sys
 from pathlib import Path
-# Adicionar o diretório raiz ao PATH do Python para permitir importações relativas
-# quando o script é executado diretamente
+# Add the root directory to the Python PATH to allow relative imports when the script is executed directly
 current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 root_dir = current_dir.parent.parent
 if str(root_dir) not in sys.path:
@@ -12,21 +11,21 @@ from src.config.settings import DB_PATH
 
 def clear_agent_memory(thread_id=None):
     """
-    Limpa a memória do agente armazenada no banco de dados SQLite.
-    
+    Clears the agent's memory stored in the SQLite database.
+
     Args:
-        thread_id (str, optional): ID específico do thread para limpar.
-                                   Se None, limpa todos os threads.
-    
+        thread_id (str, optional): Specific thread ID to clear.
+                                   If None, clears all threads.
+
     Returns:
-        int: Número de registros removidos
+        int: Number of records removed
     """
     try:
-        # Usa a mesma conexão que o agente
+        # Uses the same connection as the agent
         conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         cursor = conn.cursor()
         
-        # Verifica se as tabelas existem
+        # Check if the tables exist
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [table[0] for table in cursor.fetchall()]
         
@@ -34,10 +33,10 @@ def clear_agent_memory(thread_id=None):
         
         if 'checkpoints' in tables:
             if thread_id:
-                # Remove apenas registros do thread específico
+                # Remove only records from the specific thread
                 cursor.execute("DELETE FROM checkpoints WHERE config LIKE ?", (f'%"thread_id": "{thread_id}"%',))
             else:
-                # Remove todos os registros
+                # Remove all records
                 cursor.execute("DELETE FROM checkpoints")
             records_removed += cursor.rowcount
         
@@ -53,10 +52,10 @@ def clear_agent_memory(thread_id=None):
         
         return records_removed
     except Exception as e:
-        print(f"Erro ao limpar a memória do agente: {e}")
+        print(f"Error clearing the agent's memory: {e}")
         return 0
     
 
 if __name__ == "__main__":
     n = clear_agent_memory()
-    print(f"Número de registros removidos: {n}")
+    print(f"Number of records removed: {n}")

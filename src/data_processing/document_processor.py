@@ -13,11 +13,11 @@ class DocumentProcessor:
         )
     
     def process_txt(self, file_path: str) -> List[Dict[str, Any]]:
-        """Processa arquivos TXT."""
+        """Processes TXT files."""
         loader = TextLoader(file_path)
         documents = loader.load()
         
-        # Extrair metadados
+        # Extract metadata
         metadata = {
             'source': file_path,
             'filename': os.path.basename(file_path),
@@ -27,29 +27,29 @@ class DocumentProcessor:
             'modification_time': os.path.getmtime(file_path)
         }
         
-        # Dividir texto em chunks
+        # Split text into chunks
         chunks = self.text_splitter.split_documents(documents)
         
-        # Atualizar metadados para cada chunk
+        # Update metadata for each chunk
         for chunk in chunks:
             chunk.metadata.update(metadata)
             
         return chunks
     
     def process_htm(self, file_path: str) -> List[Dict[str, Any]]:
-        """Processa arquivos HTM."""
+        """Processes HTM files."""
         loader = BSHTMLLoader(file_path)
         documents = loader.load()
 
-        # Limpeza do conteúdo HTML
+        # Clean HTML content
         cleaned_documents = []
         for doc in documents:
             soup = BeautifulSoup(doc.page_content, 'html.parser')
-            cleaned_text = soup.get_text(separator=" ").strip()  # Extrai texto limpo
-            doc.page_content = cleaned_text  # Atualiza o conteúdo do documento
+            cleaned_text = soup.get_text(separator=" ").strip()  # Extract clean text
+            doc.page_content = cleaned_text  # Update document content
             cleaned_documents.append(doc)
 
-        # Extrair metadados
+        # Extract metadata
         metadata = {
             'source': file_path,
             'filename': os.path.basename(file_path),
@@ -59,21 +59,21 @@ class DocumentProcessor:
             'modification_time': os.path.getmtime(file_path)
         }
 
-        # Dividir texto em chunks
+        # Split text into chunks
         chunks = self.text_splitter.split_documents(cleaned_documents)
 
-        # Atualizar metadados para cada chunk
+        # Update metadata for each chunk
         for chunk in chunks:
             chunk.metadata.update(metadata)
 
         return chunks
     
     def process_pdf(self, file_path: str) -> List[Dict[str, Any]]:
-        """Processa arquivos PDF sem usar OCR."""
+        """Processes PDF files without using OCR."""
         loader = PyPDFLoader(file_path)
         documents = loader.load()
         
-        # Extrair metadados
+        # Extract metadata
         metadata = {
             'source': file_path,
             'filename': os.path.basename(file_path),
@@ -84,26 +84,26 @@ class DocumentProcessor:
             'page_count': len(documents)
         }
         
-        # Adicionar metadados específicos de página
+        # Add page-specific metadata
         for doc in documents:
             doc.metadata.update({
                 'page': doc.metadata.get('page', 0),
                 'total_pages': len(documents)
             })
         
-        # Dividir texto em chunks
+        # Split text into chunks
         chunks = self.text_splitter.split_documents(documents)
         
-        # Atualizar metadados para cada chunk
+        # Update metadata for each chunk
         for chunk in chunks:
             chunk.metadata.update(metadata)
             
         return chunks
     
     def process_file(self, file_path: str) -> List[Dict[str, Any]]:
-        """Processa um arquivo com base em sua extensão."""
+        """Processes a file based on its extension."""
         if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Arquivo não encontrado: {file_path}")
+            raise FileNotFoundError(f"File not found: {file_path}")
         
         extension = file_path.split('.')[-1].lower()
         
@@ -114,4 +114,4 @@ class DocumentProcessor:
         elif extension == 'pdf':
             return self.process_pdf(file_path)
         else:
-            raise ValueError(f"Formato não suportado: {extension}")
+            raise ValueError(f"Unsupported format: {extension}")

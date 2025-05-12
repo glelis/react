@@ -180,3 +180,5 @@ cython_debug/
 data_raw/
 chunks/
 embeddings/
+data/
+chroma_db/

@@ -1,5 +1,5 @@
 """
-Interface Streamlit para o chatbot LangGraph.
+Streamlit interface for the LangGraph chatbot.
 """
 import os
 import sys
@@ -9,75 +9,75 @@ import requests
 from pathlib import Path
 import streamlit as st
 
-# Adicionar o diretório raiz ao PATH do Python
+# Add the root directory to the Python PATH
 current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 root_dir = current_dir.parent.parent
 if str(root_dir) not in sys.path:
     sys.path.insert(0, str(root_dir))
 
-# Importar a função clear_agent_memory para limpar o banco de dados
+# Import the clear_agent_memory function to clear the database
 from src.database.chat_memory import clear_agent_memory
 
-# Configurar a página Streamlit
+# Configure the Streamlit page
 st.set_page_config(
     page_title="LangGraph Chatbot",
     page_icon="🤖",
     layout="centered"
 )
 
-# Verificar se API_URL está nas configurações ou usar padrão
+# Check if API_URL is in the settings or use the default
 def get_api_url():
     return os.environ.get("API_URL", "http://localhost:5000")
 
-# Inicializar variáveis de estado da sessão
+# Initialize session state variables
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = str(uuid.uuid4())[:8]
 
-# Título do aplicativo
+# Application title
 st.title("🤖 LangGraph Chatbot")
 
-# Botão para testar conexão com API
+# Button to test API connection
 with st.sidebar:
-    if st.button("Testar Conexão com API"):
+    if st.button("Test API Connection"):
         try:
             response = requests.get(f"{get_api_url()}/health", timeout=5)
             if response.status_code == 200:
-                st.success(f"API disponível: {response.json().get('message', '')}")
+                st.success(f"API available: {response.json().get('message', '')}")
             else:
-                st.error(f"API retornou erro: {response.status_code}")
+                st.error(f"API returned error: {response.status_code}")
         except requests.RequestException as e:
-            st.error(f"Não foi possível conectar à API: {e}")
+            st.error(f"Unable to connect to the API: {e}")
 
-# Exibir mensagens do histórico
+# Display messages from the history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Input do usuário
-user_input = st.chat_input("Digite sua mensagem...")
+# User input
+user_input = st.chat_input("Type your message...")
 
 if user_input:
-    # Adicionar mensagem do usuário ao histórico
+    # Add user message to the history
     st.session_state.messages.append({"role": "user", "content": user_input})
     
-    # Exibir mensagem do usuário
+    # Display user message
     with st.chat_message("user"):
         st.markdown(user_input)
     
-    # Preparar mensagem para o chatbot
+    # Prepare message for the chatbot
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        message_placeholder.markdown("Pensando...")
+        message_placeholder.markdown("Thinking...")
         
         try:
-            # Enviar mensagem para a API
+            # Send message to the API
             api_url = f"{get_api_url()}/chat"
             
-            # Depuração - exibir o que está sendo enviado para a API
-            st.sidebar.write("Enviando para API:", {"message": user_input, "thread_id": st.session_state.thread_id})
+            # Debugging - display what is being sent to the API
+            st.sidebar.write("Sending to API:", {"message": user_input, "thread_id": st.session_state.thread_id})
             
             response = requests.post(
                 api_url,
@@ -85,98 +85,98 @@ if user_input:
                 timeout=60
             )
             
-            # Depuração - exibir resposta bruta da API
-            st.sidebar.write("Código de status da API:", response.status_code)
-            st.sidebar.write("Resposta da API (raw):", response.text)
+            # Debugging - display raw API response
+            st.sidebar.write("API status code:", response.status_code)
+            st.sidebar.write("API response (raw):", response.text)
             
             if response.status_code == 200:
                 try:
                     data = response.json()
                     
-                    # Depuração - exibir dados estruturados
-                    st.sidebar.write("Dados da API (parsed):", data)
+                    # Debugging - display structured data
+                    st.sidebar.write("API data (parsed):", data)
                     
-                    # Atualizar thread_id se fornecido
+                    # Update thread_id if provided
                     if "thread_id" in data:
                         st.session_state.thread_id = data["thread_id"]
                     
-                    # Processar resposta
+                    # Process response
                     if "response" in data and isinstance(data["response"], list) and len(data["response"]) > 0:
-                        # Procurar apenas pela resposta do assistente (tipo "ai")
+                        # Look only for assistant responses (type "ai")
                         ai_responses = [msg for msg in data["response"] if isinstance(msg, dict) and msg.get("type") == "ai"]
                         
                         if ai_responses:
-                            # Usar apenas a última resposta do assistente
+                            # Use only the last assistant response
                             bot_message = ai_responses[-1]["content"]
                         else:
-                            # Se não houver resposta do tipo "ai", usar a última resposta
+                            # If no response of type "ai", use the last response
                             bot_response = data["response"][-1]
                             if isinstance(bot_response, dict) and "content" in bot_response:
                                 bot_message = bot_response["content"]
                             else:
                                 bot_message = str(bot_response)
-                                st.sidebar.warning("Formato de resposta inesperado")
+                                st.sidebar.warning("Unexpected response format")
                     else:
-                        bot_message = "Não recebi uma resposta clara. Tente novamente."
+                        bot_message = "I didn't receive a clear response. Please try again."
                     
-                    # Mostrar a resposta e atualizar o histórico
+                    # Show the response and update the history
                     message_placeholder.markdown(bot_message)
                     st.session_state.messages.append({"role": "assistant", "content": bot_message})
                     
                 except Exception as e:
-                    st.sidebar.error(f"Erro ao processar resposta JSON: {e}")
-                    message_placeholder.markdown(f"❌ Erro ao processar resposta: {str(e)}")
+                    st.sidebar.error(f"Error processing JSON response: {e}")
+                    message_placeholder.markdown(f"❌ Error processing response: {str(e)}")
             else:
-                error_msg = f"Erro na API: {response.status_code}"
+                error_msg = f"API error: {response.status_code}"
                 if response.text:
                     try:
                         error_data = response.json()
                         if "error" in error_data:
                             error_msg = error_data["error"]
                     except:
-                        error_msg = f"Erro na API: {response.text}"
+                        error_msg = f"API error: {response.text}"
                 
                 message_placeholder.markdown(f"❌ {error_msg}")
         
         except requests.exceptions.RequestException as e:
-            message_placeholder.markdown(f"❌ Erro de conexão: {str(e)}")
-            st.error(f"Não foi possível conectar à API em {get_api_url()}. Verifique se o servidor está em execução.")
+            message_placeholder.markdown(f"❌ Connection error: {str(e)}")
+            st.error(f"Unable to connect to the API at {get_api_url()}. Please check if the server is running.")
 
-# Barra lateral com informações
+# Sidebar with information
 with st.sidebar:
-    st.subheader("Sobre o Chatbot")
-    st.write("Este chatbot é construído com LangGraph e utiliza um modelo de linguagem da OpenAI para fornecer respostas em tempo real.")
+    st.subheader("About the Chatbot")
+    st.write("This chatbot is built with LangGraph and uses an OpenAI language model to provide real-time responses.")
     
-    st.subheader("Estado da Conversa")
-    st.write(f"ID da conversa: {st.session_state.thread_id}")
+    st.subheader("Conversation State")
+    st.write(f"Conversation ID: {st.session_state.thread_id}")
     
-    if st.button("Nova Conversa"):
-        # Gerar um novo ID para a conversa
+    if st.button("New Conversation"):
+        # Generate a new conversation ID
         st.session_state.thread_id = str(uuid.uuid4())[:8]
         st.session_state.messages = []
         st.rerun()
     
-    st.subheader("Configurações")
-    api_url = st.text_input("URL da API:", value=get_api_url())
+    st.subheader("Settings")
+    api_url = st.text_input("API URL:", value=get_api_url())
     if api_url and api_url != get_api_url():
         os.environ["API_URL"] = api_url
-        st.success(f"URL da API atualizada para: {api_url}")
+        st.success(f"API URL updated to: {api_url}")
         st.rerun()
     
-    # Limpar estado da sessão e memória do agente se necessário
-    if st.button("Limpar Cache da Sessão"):
-        # Salvar thread_id antes de limpar o cache para poder usá-lo para limpar a memória do agente
+    # Clear session state and agent memory if necessary
+    if st.button("Clear Session Cache"):
+        # Save thread_id before clearing the cache to use it for clearing agent memory
         thread_id = st.session_state.thread_id if "thread_id" in st.session_state else None
         
-        # Limpar o cache da sessão
+        # Clear session cache
         #for key in list(st.session_state.keys()):
         #    del st.session_state[key]
             
-        # Limpar a memória do agente no banco de dados
+        # Clear agent memory in the database
         #if thread_id:
         records_removed = clear_agent_memory()
-        st.success(f"Cache da sessão e memória do agente limpos! ({records_removed} registros removidos do banco de dados)")
+        st.success(f"Session cache and agent memory cleared! ({records_removed} records removed from the database)")
         #else:
-        #    st.success("Cache da sessão limpo!")
+        #    st.success("Session cache cleared!")
             
         st.rerun()

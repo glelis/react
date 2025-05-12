@@ -1,5 +1,5 @@
 """
-API Flask para interagir com o chatbot LangGraph.
+Flask API to interact with the LangGraph chatbot.
 """
 import os
 import sys
@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from flask import Flask, request, jsonify
 
-# Adicionar o diretório raiz ao PATH do Python
+# Add the root directory to the Python PATH
 current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 root_dir = current_dir.parent.parent
 if str(root_dir) not in sys.path:
@@ -17,7 +17,7 @@ from src.config.settings import DB_PATH
 from src.chatbot.agent import graph_with_memory
 from langchain_core.messages import HumanMessage
 
-# Garantir que o diretório do banco de dados exista
+# Ensure the database directory exists
 db_dir = os.path.dirname(DB_PATH)
 os.makedirs(db_dir, exist_ok=True)
 
@@ -25,31 +25,31 @@ app = Flask(__name__)
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    """Endpoint para verificar se a API está funcionando."""
-    return jsonify({"status": "ok", "message": "API do chatbot está funcionando"}), 200
+    """Endpoint to check if the API is running."""
+    return jsonify({"status": "ok", "message": "Chatbot API is running"}), 200
 
 @app.route("/chat", methods=["POST"])
 def chat():
     """
-    Endpoint para enviar mensagens ao chatbot e receber respostas.
+    Endpoint to send messages to the chatbot and receive responses.
     
-    Espera um JSON com o seguinte formato:
+    Expects a JSON with the following format:
     {
-        "message": "Mensagem do usuário",
-        "thread_id": "ID da conversa (opcional)"
+        "message": "User's message",
+        "thread_id": "Conversation ID (optional)"
     }
     """
     data = request.json
     if not data or "message" not in data:
-        return jsonify({"error": "A mensagem é obrigatória"}), 400
+        return jsonify({"error": "Message is required"}), 400
     
     user_message = data["message"]
-    thread_id = data.get("thread_id", "20")  # Usar "20" como ID padrão se não for fornecido
+    thread_id = data.get("thread_id", "20")  # Use "20" as the default ID if not provided
     
-    # Configurar o identificador da conversa
+    # Configure the conversation identifier
     config = {"configurable": {"thread_id": thread_id}}
     
-    # Criar mensagem do usuário e invocar o grafo
+    # Create user message and invoke the graph
     messages = [HumanMessage(content=user_message)]
     
     try:
@@ -57,18 +57,18 @@ def chat():
         app.logger.info(f"Output type: {type(output)}")
         app.logger.info(f"Output content: {output}")
         
-        # Extrair o conteúdo das mensagens de resposta
+        # Extract the content of the response messages
         response_messages = []
         
-        # Adicionar a mensagem do usuário atual ao início da resposta
+        # Add the current user message at the beginning of the response
         response_messages.append({
             "content": user_message,
             "type": "human"
         })
         
-        # Adicionar apenas a mensagem de resposta do AI (última mensagem)
+        # Add only the AI response message (last message)
         if output and "messages" in output and len(output["messages"]) > 0:
-            # A última mensagem é a resposta do AI para esta entrada
+            # The last message is the AI's response to this input
             last_message = output["messages"][-1]
             response_messages.append({
                 "content": last_message.content,
@@ -84,8 +84,8 @@ def chat():
         return jsonify(response_data)
     
     except Exception as e:
-        app.logger.error(f"Erro ao processar mensagem: {str(e)}")
-        return jsonify({"error": f"Erro ao processar sua mensagem: {str(e)}"}), 500
+        app.logger.error(f"Error processing message: {str(e)}")
+        return jsonify({"error": f"Error processing your message: {str(e)}"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_PORT", 5000))

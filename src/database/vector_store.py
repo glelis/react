@@ -6,8 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
-# Adicionar o diretório raiz ao PATH do Python para permitir importações relativas
-# quando o script é executado diretamente
+# Add the root directory to the Python PATH to allow relative imports when the script is executed directly
 current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 root_dir = current_dir.parent.parent
 if str(root_dir) not in sys.path:

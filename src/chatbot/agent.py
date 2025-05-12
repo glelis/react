@@ -5,8 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-# Adicionar o diretório raiz ao PATH do Python para permitir importações relativas
-# quando o script é executado diretamente
+# Add the root directory to the Python PATH to allow relative imports when the script is executed directly
 current_dir = Path(os.path.dirname(os.path.realpath(__file__)))
 root_dir = current_dir.parent.parent
 if str(root_dir) not in sys.path:
@@ -24,14 +23,13 @@ from langchain_openai import ChatOpenAI
 from src.database import VectorStoreManager
 from src.config.settings import LLM_MODEL, DB_PATH, DEFAULT_SEARCH_RESULTS
 
-# Garantir que o diretório do banco de dados exista
+# Ensure the database directory exists
 db_dir = os.path.dirname(DB_PATH)
 print(f"DB_DIR: {db_dir}")
 print(f"DB_PATH: {DB_PATH}")
 #os.makedirs(db_dir, exist_ok=True)
 
 # Initialize the database connection
-#conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 
 # Initialize the memory checkpointer
@@ -71,7 +69,7 @@ def call_model(state: State):
 
 def retrieve_search_results(query: str) -> dict:
     """
-    Search for exemples of Non-disclosure agreement contracts .
+    Search for examples of Non-disclosure agreement contracts.
     It retrieves the top-k results along with their similarity scores and returns them in a
     structured format with metadata.
 
@@ -201,6 +199,6 @@ def chat():
         for m in output['messages']:
             m.pretty_print()
 
-# Permitir executar o script diretamente
+# Allow the script to be executed directly
 if __name__ == "__main__":
     chat()

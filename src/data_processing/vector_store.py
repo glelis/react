@@ -8,25 +8,25 @@ from langchain.docstore.document import Document
 class VectorStoreManager:
     def __init__(self, persist_directory: str = "chroma_db"):
         """
-        Inicializa o gerenciador do banco de dados vetorial.
-        
+        Initializes the vector database manager.
+
         Args:
-            persist_directory: Diretório onde o banco de dados Chroma será armazenado
+            persist_directory: Directory where the Chroma database will be stored
         """
         load_dotenv()
         
         self.persist_directory = persist_directory
         
-        # Certificar que o diretório existe
+        # Ensure the directory exists
         os.makedirs(persist_directory, exist_ok=True)
         
-        # Configuração dos embeddings da OpenAI usando o modelo text-embedding-3-small
+        # Configure OpenAI embeddings using the text-embedding-3-small model
         self.embedding_function = OpenAIEmbeddings(
             model="text-embedding-3-small",
-            dimensions=1536  # Dimensão padrão do modelo text-embedding-3-small
+            dimensions=1536  # Default dimension of the text-embedding-3-small model
         )
         
-        # Inicializar o banco de dados Chroma
+        # Initialize the Chroma database
         self.vector_store = Chroma(
             persist_directory=persist_directory,
             embedding_function=self.embedding_function,
@@ -34,81 +34,81 @@ class VectorStoreManager:
     
     def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
-        Gera embeddings para uma lista de textos usando a função de embedding configurada.
-        
+        Generates embeddings for a list of texts using the configured embedding function.
+
         Args:
-            texts: Lista de strings para gerar embeddings
+            texts: List of strings to generate embeddings for
             
         Returns:
-            Lista de vetores de embedding
+            List of embedding vectors
         """
         return self.embedding_function.embed_documents(texts)
     
     def add_documents(self, documents: List[Document]):
         """
-        Adiciona documentos ao banco de dados vetorial.
-        
+        Adds documents to the vector database.
+
         Args:
-            documents: Lista de documentos para adicionar ao banco de dados
+            documents: List of documents to add to the database
         """
-        # Adicionar os documentos ao Chroma
+        # Add the documents to Chroma
         self.vector_store.add_documents(documents)
         
-        # Persistir o banco de dados
+        # Persist the database
         self.vector_store.persist()
     
     def add_documents_with_embeddings(self, texts: List[str], embeddings: List[List[float]], 
                                       metadatas: List[Dict[str, Any]]):
         """
-        Adiciona documentos com embeddings pré-calculados ao banco de dados vetorial.
-        
+        Adds documents with precomputed embeddings to the vector database.
+
         Args:
-            texts: Lista de textos dos documentos
-            embeddings: Lista de vetores de embedding pré-calculados
-            metadatas: Lista de metadados associados aos documentos
+            texts: List of document texts
+            embeddings: List of precomputed embedding vectors
+            metadatas: List of metadata associated with the documents
         """
-        # Adicionar ao Chroma usando o método correto
+        # Add to Chroma using the correct method
         self.vector_store.add_texts(
             texts=texts,
             metadatas=metadatas,
             embeddings=embeddings
         )
         
-        # Persistir o banco de dados
+        # Persist the database
         self.vector_store.persist()
     
     def search(self, query: str, k: int = 5) -> List[Document]:
         """
-        Realiza uma busca semântica no banco de dados.
-        
+        Performs a semantic search in the database.
+
         Args:
-            query: Consulta de texto
-            k: Número de documentos a retornar
+            query: Text query
+            k: Number of documents to return
             
         Returns:
-            Lista dos documentos mais similares
+            List of the most similar documents
         """
         return self.vector_store.similarity_search(query, k=k)
     
     def search_with_score(self, query: str, k: int = 5) -> List[tuple]:
         """
-        Realiza uma busca semântica e retorna os documentos com suas pontuações.
-        
+        Performs a semantic search and returns the documents with their scores.
+
         Args:
-            query: Consulta de texto
-            k: Número de documentos a retornar
+            query: Text query
+            k: Number of documents to return
             
         Returns:
-            Lista de tuplas (documento, pontuação)
+            List of tuples (document, score)
         """
         return self.vector_store.similarity_search_with_score(query, k=k)
     
     def get_collection_stats(self) -> Dict[str, Any]:
         """
-        Retorna estatísticas sobre o banco de dados.
-        
+        Returns statistics about the database.
+
         Returns:
-            Dicionário com estatísticas do banco de dados
+            Dictionary with database statistics
         """
         collection = self.vector_store._collection
         return {
